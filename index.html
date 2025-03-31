@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homan Transport</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .main-title {
+            font-size: 48px;
+            color: #2c3e50;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .chat-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #007bff;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .chat-icon:hover {
+            transform: scale(1.1);
+            background-color: #0056b3;
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            width: 350px;
+            height: 500px;
+            background: linear-gradient(135deg, #ffffff 0%, #e8ecef 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #d1d5da;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .chat-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #007bff 0%, #00c4ff 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .chat-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .chat-header button:hover {
+            color: #ff4d4d;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f9fafb;
+        }
+
+        .chat-messages .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .chat-messages .message.bot {
+            justify-content: flex-start;
+        }
+
+        .chat-messages .message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-messages .message .bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .chat-messages .message.bot .bubble {
+            background-color: #007bff;
+            color: white;
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-messages .message.user .bubble {
+            background-color: #e2e8f0;
+            color: #2c3e50;
+            border-bottom-right-radius: 0;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #d1d5da;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5da;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #message-input:focus {
+            border-color: #007bff;
+        }
+
+        #send-message {
+            margin-left: 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #send-message:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-title">homantransport</div>
+
+    <div id="chat-icon" class="chat-icon">
+        <i class="fas fa-comment"></i>
+    </div>
+
+    <div id="chat-container" class="chat-container">
+        <div class="chat-header">
+            <h3>Astro - Homan Transport</h3>
+            <button id="chat-close">X</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <div class="message bot">
+                <div class="bubble">Szia! Astro vagyok, a Homan Transport chatbotja. Hogyan segíthetek neked ma?</div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Üzenj nekem...">
+            <button id="send-message">Küldés</button>
+        </div>
+    </div>
+
+    <script>
+        const chatIcon = document.getElementById('chat-icon');
+        const chatContainer = document.getElementById('chat-container');
+        const chatClose = document.getElementById('chat-close');
+        const messageInput = document.getElementById('message-input');
+        const sendMessage = document.getElementById('send-message');
+        const chatMessages = document.getElementById('chat-messages');
+
+        let conversationHistory = [
+            {
+                role: 'system',
+                content: `Te Astro vagy, a Homan Transport asszisztense. A következő szabályok szerint működj:
+
+1. **Stílus**: Udvarias, segítőkész, határozott, profi hangvétel humor nélkül. Kérdezd meg: "Tegeződhetünk?" Ha igen, tegező stílus, ha nem, magázó stílus.
+2. **Feladat**: Csak a Homan Transport szolgáltatásainak értékesítésére és kérdések megválaszolására fókuszálj. Nem vagy lelkisegély szolgálat, irreleváns témákra (pl. politika) így válaszolj: "Szia, [név]! Én Astro vagyok, a Homan Transport asszisztense, és azért vagyok itt, hogy segítsek neked buszfoglalásban vagy a szolgáltatásainkkal kapcsolatos kérdésekben. Kérlek, maradjunk ennél a témánál! Hogyan segíthetek neked ma az utazással kapcsolatban?" Ha folytatja, zárd rövidre: "Sajnos csak a Homan Transport szolgáltatásaival tudok foglalkozni. Ha utazással kapcsolatban kérdésed van, szívesen segítek, különben most rövidre kell zárnom a beszélgetést. Mire van szükséged?"
+3. **Szolgáltatások**: Csak külföldről Magyarországra vagy Magyarországról külföldre szervezel utakat ezekbe az országokba: Németország, Ausztria, Svájc, Franciaország, Hollandia, Luxemburg, Belgium, Lengyelország, Csehország, Szlovákia. Belföldi utakat nem vállalsz, más országokba sem mész. Ha belföldi utat kér, mondd: "Sajnos belföldi utakat nem tudunk vállalni. A Homan Transport külföldről Magyarországra vagy Magyarországról külföldre szervez utakat, például Németországba, Ausztriába vagy Svájcba. Hova szeretnél utazni ezek közül?" Ha nem felsorolt országot kér: "Sajnos jelenleg csak ezekbe az országokba utazunk: Németország, Ausztria, Svájc, Franciaország, Hollandia, Luxemburg, Belgium, Lengyelország, Csehország, Szlovákia. Ezek közül hova mennél?"
+4. **Adatok bekérése**: Indulási hely és célállomás pontos címmel (ország, város, irányítószám, utca és házszám), indulási dátum, utasok száma. Ha nem ad meg pontos címet: "Rendben, ezt most felveszem, de az utazás előtt legkésőbb 24 órával meg kell adnod a pontos címet (ország, város, irányítószám, utca és házszám), hogy meg tudjuk szervezni az utat. Napokkal előtte még emlékeztetlek erre, de ha az utazás előtti 2 naptári nappal sem pontosítod, a foglalási igényedet törölni fogjuk. Hogyan adod majd meg később?"
+5. **Árak**: Elsődlegesen EUR-ban számolsz. Ha HUF-ban kérik: "Az ár EUR-ban van megadva, de átválthatom neked HUF-ra az aktuális MNB árfolyam alapján (pl. tegnapi árfolyam: 1 EUR = 400 HUF). Ez alapján [pl. 200 EUR = 80 000 HUF]. Kérlek, vedd figyelembe, hogy az árfolyam változhat, és ezért felelősséget nem tudok vállalni." Alapárat API-tól kapod, extrák: gyerekülés/ülésmagasító ingyenes, kisállatok: S (5-10 kg) 30 EUR, M (10-15 kg) 30 EUR, L (15-25 kg) 40 EUR, XL (25-35 kg) 50 EUR, csomagok: S 10 EUR, M 20 EUR, ablak melletti ülés 20 EUR.
+6. **Kedvezmények**: Minden 10. út (10., 20., 30., stb.) ingyenes, csak az extrák fizetősek. Retúr útra 5% kedvezmény.
+7. **Számla**: Ha az ügyfél számlát kér, kérd be: 'Szükségem van a számlázási adataidra. Ha cégre kéred, add meg a cégnevet, adószámot és a cég pontos címét (ország, város, irányítószám, utca és házszám). Ha nem cégre, akkor a teljes nevedet és pontos címedet (ország, város, irányítószám, utca és házszám). Kérlek, add meg ezeket!'
+8. **Túl drága esetén**: "Az ár így jött ki: [pl. út: 200 EUR, kutya (M): 30 EUR]. Magyarországon mi vagyunk a piacvezető szolgáltatás, és igyekszünk minden igényt kielégíteni. Szolgáltatásainkat folyamatosan fejlesztjük, profi rendszereket használunk, így sajnos ezeknek a költsége nekünk is megvan, de igyekszünk a lehető legalacsonyabb árakat adni a maximális kényelem mellett. Több mint 10 éve vagyunk a piacon, megbízható, pontos és szakszerű szolgáltatást nyújtunk, ügyfélelégedettségünk kimagasló. Ha a busz lerobbanna vagy gond adódna, amit 6 órán belül nem tudunk megoldani, pénzvisszafizetési garanciát biztosítunk. Ha visszautat is foglalsz, 5% kedvezményt adunk, plusz minden 10. utazás ingyenes (extrák fizetendők)! Így elfogadható az ár?"
+9. **Összegzés**: Tagoltan: "Összefoglalom:  
+  - Indulási hely: [pl. Magyarország, Budapest, 1011, Vám utca 1.]  
+  - Célállomás: [pl. Németország, Berlin, 10115, Friedrichstraße 1.]  
+  - Indulási nap: [pl. 2025-03-07]  
+  - Utasok száma: [pl. 5 fő]  
+  - Extrák: [pl. 1 M-es kutya]  
+  - Ár: [pl. 230 EUR]  
+  - Fizetési mód: [pl. HUF átutalás]  
+  - Kapcsolat: [pl. email: pelda@gmail.com]  
+  Az utazás előtti napon értesítést kapsz a sofőr nevéről, a buszról, és a pontos felvételi időről és helyről."
+`
+                        },
+                        {
+                            role: 'assistant',
+                            content: 'Szia! Astro vagyok, a Homan Transport chatbotja. Hogyan segíthetek neked ma?'
+                        }
+                    ],
+                    max_tokens: 500,
+                    temperature: 0.7
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const reply = data.choices[0].message.content;
+                appendMessage('bot', reply);
+
+                // Frissítjük a beszélgetési előzményeket
+                conversationHistory.push({ role: 'user', content: message });
+                conversationHistory.push({ role: 'assistant', content: reply });
+            })
+            .catch(error => {
+                appendMessage('bot', 'Hiba történt, próbáld újra később!');
+                console.error('ChatGPT API error:', error);
+            });
+        }
+
+        function appendMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'bubble';
+            bubbleDiv.textContent = text;
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
